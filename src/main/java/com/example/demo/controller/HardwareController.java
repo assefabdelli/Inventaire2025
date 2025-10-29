@@ -28,9 +28,14 @@ public class HardwareController {
     @PostMapping
     public ResponseEntity<HardwareDto> create(@RequestBody HardwareDto dto) {
         Hardware e = new Hardware();
+        e.setName(dto.name);
         e.setType(dto.type);
         e.setModel(dto.model);
         e.setSerialNumber(dto.serialNumber);
+        e.setIpAddress(dto.ipAddress);
+        e.setCpuCores(dto.cpuCores);
+        e.setRamGb(dto.ramGb);
+        e.setStorageGb(dto.storageGb);
         e.setStatus(dto.status);
         e.setPurchaseDate(dto.purchaseDate);
         e.setWarrantyEndDate(dto.warrantyEndDate);
@@ -41,9 +46,14 @@ public class HardwareController {
     @PutMapping("/{id}")
     public ResponseEntity<HardwareDto> update(@PathVariable Long id, @RequestBody HardwareDto dto) {
         Hardware updated = new Hardware();
+        updated.setName(dto.name);
         updated.setType(dto.type);
         updated.setModel(dto.model);
         updated.setSerialNumber(dto.serialNumber);
+        updated.setIpAddress(dto.ipAddress);
+        updated.setCpuCores(dto.cpuCores);
+        updated.setRamGb(dto.ramGb);
+        updated.setStorageGb(dto.storageGb);
         updated.setStatus(dto.status);
         updated.setPurchaseDate(dto.purchaseDate);
         updated.setWarrantyEndDate(dto.warrantyEndDate);
@@ -60,9 +70,14 @@ public class HardwareController {
     private static HardwareDto toDto(Hardware e) {
         HardwareDto dto = new HardwareDto();
         dto.id = e.getId();
+        dto.name = e.getName();
         dto.type = e.getType();
         dto.model = e.getModel();
         dto.serialNumber = e.getSerialNumber();
+        dto.ipAddress = e.getIpAddress();
+        dto.cpuCores = e.getCpuCores();
+        dto.ramGb = e.getRamGb();
+        dto.storageGb = e.getStorageGb();
         dto.status = e.getStatus();
         dto.purchaseDate = e.getPurchaseDate();
         dto.warrantyEndDate = e.getWarrantyEndDate();

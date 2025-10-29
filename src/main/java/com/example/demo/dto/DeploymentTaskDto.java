@@ -5,11 +5,15 @@ import java.time.Instant;
 
 public class DeploymentTaskDto {
     public Long id;
+    public String taskName;
+    public String description;
     public Long vmId;
     public Long requestedById;
+    public Long assignedUserId; // Alias for requestedById
     public DeploymentStatus status;
     public Instant createdAt;
     public Instant completedAt;
+    public Instant scheduledDate;
 }
 
 

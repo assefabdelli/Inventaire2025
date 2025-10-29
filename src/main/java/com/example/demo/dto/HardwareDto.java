@@ -6,9 +6,14 @@ import java.time.LocalDate;
 
 public class HardwareDto {
     public Long id;
+    public String name;
     public HardwareType type;
     public String model;
     public String serialNumber;
+    public String ipAddress;
+    public Integer cpuCores;
+    public Integer ramGb;
+    public Integer storageGb;
     public HardwareStatus status;
     public LocalDate purchaseDate;
     public LocalDate warrantyEndDate;

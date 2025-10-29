@@ -26,6 +26,9 @@ public class VirtualMachineService {
     }
 
     public VirtualMachine create(VirtualMachine vm, Long hardwareId) {
+        if (hardwareId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hardware ID is required");
+        }
         Hardware hw = hardwareRepository.findById(hardwareId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid hardwareId"));
         vm.setHardware(hw);
         return vmRepository.save(vm);
@@ -38,11 +41,13 @@ public class VirtualMachineService {
             existing.setHardware(hw);
         }
         existing.setName(updated.getName());
-        existing.setCpu(updated.getCpu());
-        existing.setRamGB(updated.getRamGB());
-        existing.setDiskGB(updated.getDiskGB());
+        existing.setHostname(updated.getHostname());
+        existing.setIpAddress(updated.getIpAddress());
+        existing.setOperatingSystem(updated.getOperatingSystem());
+        existing.setVcpu(updated.getVcpu());
+        existing.setVram(updated.getVram());
+        existing.setDiskSize(updated.getDiskSize());
         existing.setStatus(updated.getStatus());
-        existing.setOs(updated.getOs());
         return vmRepository.save(existing);
     }
 

@@ -24,20 +24,26 @@ public class VirtualMachine {
     private String name;
 
     @Column(nullable = false)
-    private int cpu;
+    private String hostname;
+
+    @Column
+    private String ipAddress;
 
     @Column(nullable = false)
-    private int ramGB;
+    private String operatingSystem;
 
     @Column(nullable = false)
-    private int diskGB;
+    private int vcpu;
+
+    @Column(nullable = false)
+    private int vram;
+
+    @Column(nullable = false)
+    private int diskSize;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private VMStatus status = VMStatus.STOPPED;
-
-    @Column(nullable = false)
-    private String os;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "hardware_id", nullable = false)
@@ -49,20 +55,26 @@ public class VirtualMachine {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public int getCpu() { return cpu; }
-    public void setCpu(int cpu) { this.cpu = cpu; }
+    public String getHostname() { return hostname; }
+    public void setHostname(String hostname) { this.hostname = hostname; }
 
-    public int getRamGB() { return ramGB; }
-    public void setRamGB(int ramGB) { this.ramGB = ramGB; }
+    public String getIpAddress() { return ipAddress; }
+    public void setIpAddress(String ipAddress) { this.ipAddress = ipAddress; }
 
-    public int getDiskGB() { return diskGB; }
-    public void setDiskGB(int diskGB) { this.diskGB = diskGB; }
+    public String getOperatingSystem() { return operatingSystem; }
+    public void setOperatingSystem(String operatingSystem) { this.operatingSystem = operatingSystem; }
+
+    public int getVcpu() { return vcpu; }
+    public void setVcpu(int vcpu) { this.vcpu = vcpu; }
+
+    public int getVram() { return vram; }
+    public void setVram(int vram) { this.vram = vram; }
+
+    public int getDiskSize() { return diskSize; }
+    public void setDiskSize(int diskSize) { this.diskSize = diskSize; }
 
     public VMStatus getStatus() { return status; }
     public void setStatus(VMStatus status) { this.status = status; }
-
-    public String getOs() { return os; }
-    public void setOs(String os) { this.os = os; }
 
     public Hardware getHardware() { return hardware; }
     public void setHardware(Hardware hardware) { this.hardware = hardware; }

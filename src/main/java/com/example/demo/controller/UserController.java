@@ -4,6 +4,7 @@ import com.example.demo.dto.UserDto;
 import com.example.demo.entite.User;
 import com.example.demo.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
@@ -13,7 +14,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/users")
 public class UserController {
     private final UserService service;
-    public UserController(UserService service) { this.service = service; }
+    private final PasswordEncoder passwordEncoder;
+    
+    public UserController(UserService service, PasswordEncoder passwordEncoder) { 
+        this.service = service;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @GetMapping
     public List<UserDto> list() {
@@ -32,7 +38,9 @@ public class UserController {
         entity.setEmail(dto.email);
         entity.setEnabled(dto.enabled);
         entity.setRole(dto.role);
-        // passwordHash left to caller to set hashed value separately if needed
+        // Hash the password using BCrypt
+        String rawPassword = dto.passwordHash != null ? dto.passwordHash : "defaultPassword123";
+        entity.setPasswordHash(passwordEncoder.encode(rawPassword));
         User saved = service.save(entity);
         return ResponseEntity.created(URI.create("/api/users/" + saved.getId())).body(toDto(saved));
     }
@@ -44,6 +52,10 @@ public class UserController {
             existing.setEmail(dto.email);
             existing.setEnabled(dto.enabled);
             existing.setRole(dto.role);
+            // Update and hash password only if provided
+            if (dto.passwordHash != null && !dto.passwordHash.isEmpty()) {
+                existing.setPasswordHash(passwordEncoder.encode(dto.passwordHash));
+            }
             User saved = service.save(existing);
             return ResponseEntity.ok(toDto(saved));
         }).orElse(ResponseEntity.notFound().build());

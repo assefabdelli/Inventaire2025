@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/vms")
+@RequestMapping("/api/virtual-machines")
 public class VirtualMachineController {
     private final VirtualMachineService service;
     public VirtualMachineController(VirtualMachineService service) { this.service = service; }
@@ -29,24 +29,28 @@ public class VirtualMachineController {
     public ResponseEntity<VirtualMachineDto> create(@RequestBody VirtualMachineDto dto) {
         VirtualMachine e = new VirtualMachine();
         e.setName(dto.name);
-        e.setCpu(dto.cpu);
-        e.setRamGB(dto.ramGB);
-        e.setDiskGB(dto.diskGB);
+        e.setHostname(dto.hostname);
+        e.setIpAddress(dto.ipAddress);
+        e.setOperatingSystem(dto.operatingSystem);
+        e.setVcpu(dto.vcpu);
+        e.setVram(dto.vram);
+        e.setDiskSize(dto.diskSize);
         e.setStatus(dto.status);
-        e.setOs(dto.os);
         VirtualMachine saved = service.create(e, dto.hardwareId);
-        return ResponseEntity.created(URI.create("/api/vms/" + saved.getId())).body(toDto(saved));
+        return ResponseEntity.created(URI.create("/api/virtual-machines/" + saved.getId())).body(toDto(saved));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<VirtualMachineDto> update(@PathVariable Long id, @RequestBody VirtualMachineDto dto) {
         VirtualMachine updated = new VirtualMachine();
         updated.setName(dto.name);
-        updated.setCpu(dto.cpu);
-        updated.setRamGB(dto.ramGB);
-        updated.setDiskGB(dto.diskGB);
+        updated.setHostname(dto.hostname);
+        updated.setIpAddress(dto.ipAddress);
+        updated.setOperatingSystem(dto.operatingSystem);
+        updated.setVcpu(dto.vcpu);
+        updated.setVram(dto.vram);
+        updated.setDiskSize(dto.diskSize);
         updated.setStatus(dto.status);
-        updated.setOs(dto.os);
         VirtualMachine saved = service.update(id, updated, dto.hardwareId);
         return ResponseEntity.ok(toDto(saved));
     }
@@ -61,11 +65,13 @@ public class VirtualMachineController {
         VirtualMachineDto dto = new VirtualMachineDto();
         dto.id = e.getId();
         dto.name = e.getName();
-        dto.cpu = e.getCpu();
-        dto.ramGB = e.getRamGB();
-        dto.diskGB = e.getDiskGB();
+        dto.hostname = e.getHostname();
+        dto.ipAddress = e.getIpAddress();
+        dto.operatingSystem = e.getOperatingSystem();
+        dto.vcpu = e.getVcpu();
+        dto.vram = e.getVram();
+        dto.diskSize = e.getDiskSize();
         dto.status = e.getStatus();
-        dto.os = e.getOs();
         dto.hardwareId = e.getHardware() != null ? e.getHardware().getId() : null;
         return dto;
     }

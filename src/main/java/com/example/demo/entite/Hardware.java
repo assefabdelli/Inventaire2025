@@ -22,6 +22,9 @@ public class Hardware {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String name;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private HardwareType type;
@@ -31,6 +34,18 @@ public class Hardware {
 
     @Column(nullable = false)
     private String serialNumber;
+
+    @Column
+    private String ipAddress;
+
+    @Column
+    private Integer cpuCores;
+
+    @Column
+    private Integer ramGb;
+
+    @Column
+    private Integer storageGb;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -49,6 +64,9 @@ public class Hardware {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
     public HardwareType getType() { return type; }
     public void setType(HardwareType type) { this.type = type; }
 
@@ -57,6 +75,18 @@ public class Hardware {
 
     public String getSerialNumber() { return serialNumber; }
     public void setSerialNumber(String serialNumber) { this.serialNumber = serialNumber; }
+
+    public String getIpAddress() { return ipAddress; }
+    public void setIpAddress(String ipAddress) { this.ipAddress = ipAddress; }
+
+    public Integer getCpuCores() { return cpuCores; }
+    public void setCpuCores(Integer cpuCores) { this.cpuCores = cpuCores; }
+
+    public Integer getRamGb() { return ramGb; }
+    public void setRamGb(Integer ramGb) { this.ramGb = ramGb; }
+
+    public Integer getStorageGb() { return storageGb; }
+    public void setStorageGb(Integer storageGb) { this.storageGb = storageGb; }
 
     public HardwareStatus getStatus() { return status; }
     public void setStatus(HardwareStatus status) { this.status = status; }

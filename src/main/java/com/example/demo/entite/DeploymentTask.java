@@ -21,6 +21,12 @@ public class DeploymentTask {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String taskName;
+
+    @Column(length = 1000)
+    private String description;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "vm_id", nullable = false)
     private VirtualMachine vm;
@@ -39,8 +45,17 @@ public class DeploymentTask {
     @Column
     private Instant completedAt;
 
+    @Column
+    private Instant scheduledDate;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public String getTaskName() { return taskName; }
+    public void setTaskName(String taskName) { this.taskName = taskName; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     public VirtualMachine getVm() { return vm; }
     public void setVm(VirtualMachine vm) { this.vm = vm; }
@@ -56,6 +71,9 @@ public class DeploymentTask {
 
     public Instant getCompletedAt() { return completedAt; }
     public void setCompletedAt(Instant completedAt) { this.completedAt = completedAt; }
+
+    public Instant getScheduledDate() { return scheduledDate; }
+    public void setScheduledDate(Instant scheduledDate) { this.scheduledDate = scheduledDate; }
 }
 
 

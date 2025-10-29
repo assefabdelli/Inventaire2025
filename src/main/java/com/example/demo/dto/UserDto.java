@@ -6,6 +6,7 @@ public class UserDto {
     public Long id;
     public String username;
     public String email;
+    public String passwordHash;
     public boolean enabled;
     public Role role;
 }

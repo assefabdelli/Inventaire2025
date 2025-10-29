@@ -49,9 +49,12 @@ public class DeploymentTaskService {
             User user = userRepository.findById(requestedById).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid requestedById"));
             existing.setRequestedBy(user);
         }
+        if (updated.getTaskName() != null) existing.setTaskName(updated.getTaskName());
+        existing.setDescription(updated.getDescription());
         if (updated.getStatus() != null) existing.setStatus(updated.getStatus());
         if (updated.getCreatedAt() != null) existing.setCreatedAt(updated.getCreatedAt());
         existing.setCompletedAt(updated.getCompletedAt());
+        existing.setScheduledDate(updated.getScheduledDate());
         return taskRepository.save(existing);
     }
 

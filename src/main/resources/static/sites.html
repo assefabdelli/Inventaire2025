@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Sites Management - Inventory VM</title>
+    <link rel="stylesheet" href="css/style.css" />
+    
+    <!-- Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" crossorigin="anonymous"></script>
+    
+    <!-- Bootstrap 5 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="images/ns.png" alt="logo" style="height: 40px; width: auto;" />
+                </a>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="hardware.html">
+                            <i class="fas fa-server"></i> Hardware
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="virtual-machines.html">
+                            <i class="fas fa-network-wired"></i> Virtual Machines
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="sites.html">
+                            <i class="fas fa-building"></i> Sites
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="deployment-tasks.html">
+                            <i class="fas fa-tasks"></i> Deployments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="users.html">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="container">
+        <div class="main-card">
+            <div class="main-card-header">
+                <span><i class="fa-solid fa-building"></i> Sites Management</span>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSiteModal">
+                    <i class="fas fa-plus"></i> Add Site
+                </button>
+            </div>
+            <div class="main-card-body">
+                <!-- Sites List -->
+                <div id="sitesContainer">
+                    <div class="spinner-container">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Site Modal -->
+    <div class="modal fade" id="addSiteModal" tabindex="-1" aria-labelledby="addSiteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addSiteModalLabel">
+                        <i class="fas fa-building"></i> Add New Site
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addSiteForm">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Site Name</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="code" class="form-label">Site Code</label>
+                            <input type="text" class="form-control" id="code" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <textarea class="form-control" id="address" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="city" class="form-label">City</label>
+                            <input type="text" class="form-control" id="city">
+                        </div>
+                        <div class="mb-3">
+                            <label for="country" class="form-label">Country</label>
+                            <input type="text" class="form-control" id="country">
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactPerson" class="form-label">Contact Person</label>
+                            <input type="text" class="form-control" id="contactPerson">
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactEmail" class="form-label">Contact Email</label>
+                            <input type="email" class="form-control" id="contactEmail">
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactPhone" class="form-label">Contact Phone</label>
+                            <input type="tel" class="form-control" id="contactPhone">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addSite()">Add Site</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Site Modal -->
+    <div class="modal fade" id="editSiteModal" tabindex="-1" aria-labelledby="editSiteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editSiteModalLabel">
+                        <i class="fas fa-edit"></i> Edit Site
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editSiteForm">
+                        <input type="hidden" id="editId">
+                        <div class="mb-3">
+                            <label for="editName" class="form-label">Site Name</label>
+                            <input type="text" class="form-control" id="editName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCode" class="form-label">Site Code</label>
+                            <input type="text" class="form-control" id="editCode" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editAddress" class="form-label">Address</label>
+                            <textarea class="form-control" id="editAddress" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCity" class="form-label">City</label>
+                            <input type="text" class="form-control" id="editCity">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCountry" class="form-label">Country</label>
+                            <input type="text" class="form-control" id="editCountry">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editContactPerson" class="form-label">Contact Person</label>
+                            <input type="text" class="form-control" id="editContactPerson">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editContactEmail" class="form-label">Contact Email</label>
+                            <input type="email" class="form-control" id="editContactEmail">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editContactPhone" class="form-label">Contact Phone</label>
+                            <input type="tel" class="form-control" id="editContactPhone">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="deleteSite()">Delete</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="updateSite()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/sites.js"></script>
+</body>
+</html>
+

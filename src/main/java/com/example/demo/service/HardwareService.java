@@ -37,9 +37,14 @@ public class HardwareService {
             Site site = siteRepository.findById(siteId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid siteId"));
             existing.setSite(site);
         }
+        existing.setName(updated.getName());
         existing.setType(updated.getType());
         existing.setModel(updated.getModel());
         existing.setSerialNumber(updated.getSerialNumber());
+        existing.setIpAddress(updated.getIpAddress());
+        existing.setCpuCores(updated.getCpuCores());
+        existing.setRamGb(updated.getRamGb());
+        existing.setStorageGb(updated.getStorageGb());
         existing.setStatus(updated.getStatus());
         existing.setPurchaseDate(updated.getPurchaseDate());
         existing.setWarrantyEndDate(updated.getWarrantyEndDate());
