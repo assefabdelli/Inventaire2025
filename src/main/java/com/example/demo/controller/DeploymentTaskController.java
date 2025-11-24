@@ -1,8 +1,11 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.DeploymentTaskDto;
+import com.example.demo.entite.Department;
 import com.example.demo.entite.DeploymentTask;
+import com.example.demo.repository.DepartmentRepository;
 import com.example.demo.service.DeploymentTaskService;
+import com.example.demo.service.UserContextService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.net.URI;
@@ -12,13 +15,49 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/deployment-tasks")
+@CrossOrigin(origins = "*")
 public class DeploymentTaskController {
     private final DeploymentTaskService service;
-    public DeploymentTaskController(DeploymentTaskService service) { this.service = service; }
+    private final DepartmentRepository departmentRepository;
+    private final UserContextService userContextService;
+    
+    public DeploymentTaskController(DeploymentTaskService service, DepartmentRepository departmentRepository, UserContextService userContextService) { 
+        this.service = service;
+        this.departmentRepository = departmentRepository;
+        this.userContextService = userContextService;
+    }
 
     @GetMapping
-    public List<DeploymentTaskDto> list() {
-        return service.findAll().stream().map(DeploymentTaskController::toDto).collect(Collectors.toList());
+    public ResponseEntity<?> list(
+            @RequestParam(required = false) Long departmentId,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId) {
+        
+        try {
+            if (userId != null) {
+                userContextService.setCurrentUserId(userId);
+            }
+            
+            // If not admin, force filter by user's department
+            if (!userContextService.isAdmin()) {
+                Long userDeptId = userContextService.getCurrentUserDepartmentId();
+                if (userDeptId != null) {
+                    return ResponseEntity.ok(service.findByDepartmentId(userDeptId).stream()
+                            .map(DeploymentTaskController::toDto).collect(Collectors.toList()));
+                }
+            }
+            
+            // Admin can filter or see all
+            if (departmentId != null) {
+                return ResponseEntity.ok(service.findByDepartmentId(departmentId).stream()
+                        .map(DeploymentTaskController::toDto).collect(Collectors.toList()));
+            }
+            return ResponseEntity.ok(service.findAll().stream()
+                    .map(DeploymentTaskController::toDto).collect(Collectors.toList()));
+        } catch (Exception e) {
+            System.err.println("Error loading deployment tasks: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.ok(List.of()); // Return empty list instead of error
+        }
     }
 
     @GetMapping("/{id}")
@@ -35,6 +74,11 @@ public class DeploymentTaskController {
         e.setCreatedAt(dto.createdAt != null ? dto.createdAt : Instant.now());
         e.setCompletedAt(dto.completedAt);
         e.setScheduledDate(dto.scheduledDate);
+        if (dto.departmentId != null) {
+            Department dept = departmentRepository.findById(dto.departmentId)
+                .orElseThrow(() -> new RuntimeException("Department not found"));
+            e.setDepartment(dept);
+        }
         // Use assignedUserId if provided, otherwise fall back to requestedById
         Long userId = dto.assignedUserId != null ? dto.assignedUserId : dto.requestedById;
         DeploymentTask saved = service.create(e, dto.vmId, userId);
@@ -50,6 +94,11 @@ public class DeploymentTaskController {
         updated.setCreatedAt(dto.createdAt);
         updated.setCompletedAt(dto.completedAt);
         updated.setScheduledDate(dto.scheduledDate);
+        if (dto.departmentId != null) {
+            Department dept = departmentRepository.findById(dto.departmentId)
+                .orElseThrow(() -> new RuntimeException("Department not found"));
+            updated.setDepartment(dept);
+        }
         // Use assignedUserId if provided, otherwise fall back to requestedById
         Long userId = dto.assignedUserId != null ? dto.assignedUserId : dto.requestedById;
         DeploymentTask saved = service.update(id, updated, dto.vmId, userId);
@@ -74,6 +123,7 @@ public class DeploymentTaskController {
         dto.createdAt = e.getCreatedAt();
         dto.completedAt = e.getCompletedAt();
         dto.scheduledDate = e.getScheduledDate();
+        dto.departmentId = e.getDepartment() != null ? e.getDepartment().getId() : null;
         return dto;
     }
 }

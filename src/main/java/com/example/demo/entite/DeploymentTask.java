@@ -48,6 +48,10 @@ public class DeploymentTask {
     @Column
     private Instant scheduledDate;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -74,6 +78,9 @@ public class DeploymentTask {
 
     public Instant getScheduledDate() { return scheduledDate; }
     public void setScheduledDate(Instant scheduledDate) { this.scheduledDate = scheduledDate; }
+
+    public Department getDepartment() { return department; }
+    public void setDepartment(Department department) { this.department = department; }
 }
 
 

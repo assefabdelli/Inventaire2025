@@ -15,6 +15,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+                // Allow all requests for now (custom authorization via X-User-Id header)
                 .anyRequest().permitAll()
             )
             .httpBasic(basic -> basic.disable())

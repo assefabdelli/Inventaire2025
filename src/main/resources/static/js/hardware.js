@@ -6,19 +6,63 @@ let currentFilter = 'ALL';
 
 // Load data on page load
 document.addEventListener('DOMContentLoaded', () => {
+    // Check authentication
+    if (!checkAuth()) return;
+    
+    // Update nav user info
+    updateNavUserInfo();
+    hideRestrictedNavItems();
+    
+    // Only super admins can see department filter
+    if (isSuperAdmin()) {
+        const deptFilterContainer = document.getElementById('departmentFilterContainer');
+        if (deptFilterContainer) {
+            deptFilterContainer.style.display = 'block';
+        }
+        loadDepartments();
+    }
+    
     loadHardware();
     loadSitesForDropdown();
 });
 
+// Load departments for filter (SUPER_ADMIN only)
+async function loadDepartments() {
+    try {
+        const departments = await API.get('/departments/active');
+        const select = document.getElementById('departmentFilter');
+        if (select) {
+            departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept.id;
+                option.textContent = dept.name;
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading departments:', error);
+        // Hide the filter if loading fails
+        const deptFilterContainer = document.getElementById('departmentFilterContainer');
+        if (deptFilterContainer) {
+            deptFilterContainer.style.display = 'none';
+        }
+    }
+}
+
 // Load all hardware
 async function loadHardware() {
     try {
-        hardwareList = await API.hardware.getAll();
+        const departmentId = document.getElementById('departmentFilter')?.value || '';
+        const query = departmentId ? `?departmentId=${departmentId}` : '';
+        
+        hardwareList = await API.get(`/hardware${query}`);
         sitesList = await API.sites.getAll();
         renderHardware();
     } catch (error) {
         console.error('Error loading hardware:', error);
-        showToast('Error loading hardware', 'danger');
+        if (typeof showToast !== 'undefined') {
+            showToast('Error loading hardware', 'danger');
+        }
     }
 }
 
@@ -106,13 +150,13 @@ function createHardwareCard(hardware) {
     const image = getTypeImage(hardware.type);
     
     return `
-        <div class="card red">
-            <div class="card" style="width: 85%; height: 85%;">
+        <div class="red">
+            <div class="card">
                 <div class="content">
                     <div class="back">
                         <div class="back-content">
-                            <img src="${image}" alt="${hardware.type}" width="50%" />
-                            <strong>${hardware.ipAddress || 'No IP'}</strong>
+                            <img src="${image}" alt="${hardware.type}" style="width: 65%; max-width: 150px;" />
+                            <strong style="font-size: 16px; margin-top: 10px;">${hardware.ipAddress || 'No IP'}</strong>
                         </div>
                     </div>
                     <div class="front">
@@ -122,16 +166,16 @@ function createHardwareCard(hardware) {
                             <div class="circle" id="bottom"></div>
                         </div>
                         <div class="front-content">
-                            <small class="badge">${hardware.name}</small>
+                            <small class="badge" style="font-size: 12px; padding: 4px 12px;">${hardware.name}</small>
                             <div class="description">
                                 <div class="title">
-                                    <div style="font-size: 8px; text-align: left;">
+                                    <div style="font-size: 11px; text-align: left; line-height: 1.6;">
                                         <strong>Model:</strong> ${hardware.model}<br>
                                         <strong>CPU:</strong> ${hardware.cpuCores || 'N/A'} cores<br>
                                         <strong>RAM:</strong> ${hardware.ramGb || 'N/A'} GB<br>
                                         <strong>Storage:</strong> ${hardware.storageGb || 'N/A'} GB<br>
                                         <strong>SN:</strong> ${hardware.serialNumber}<br>
-                                        <strong>Status:</strong> <span class="status-badge ${statusClass}">${hardware.status}</span>
+                                        <strong>Status:</strong> <span class="status-badge ${statusClass}" style="font-size: 10px;">${hardware.status}</span>
                                     </div>
                                 </div>
                             </div>
@@ -139,7 +183,7 @@ function createHardwareCard(hardware) {
                     </div>
                 </div>
             </div>
-            <button class="btn btn-sm btn-primary mt-2" onclick="editHardwareModal(${hardware.id})">
+            <button class="btn btn-sm btn-primary" onclick="editHardwareModal(${hardware.id})" style="width: 260px; font-size: 14px; padding: 8px;">
                 <i class="fas fa-edit"></i> Edit
             </button>
         </div>

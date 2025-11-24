@@ -4,6 +4,13 @@ let sitesList = [];
 
 // Load data on page load
 document.addEventListener('DOMContentLoaded', () => {
+    // Check authentication
+    if (!checkAuth()) return;
+    
+    // Update nav user info
+    updateNavUserInfo();
+    hideRestrictedNavItems();
+    
     loadSites();
 });
 

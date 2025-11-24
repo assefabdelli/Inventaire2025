@@ -6,6 +6,7 @@ public class SiteDto {
     public String address;
     public String city;
     public String country;
+    public Long departmentId;
 }
 
 

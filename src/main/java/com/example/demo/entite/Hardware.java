@@ -61,6 +61,10 @@ public class Hardware {
     @JoinColumn(name = "site_id", nullable = false)
     private Site site;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -99,6 +103,9 @@ public class Hardware {
 
     public Site getSite() { return site; }
     public void setSite(Site site) { this.site = site; }
+
+    public Department getDepartment() { return department; }
+    public void setDepartment(Department department) { this.department = department; }
 }
 
 

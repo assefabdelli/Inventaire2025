@@ -13,6 +13,7 @@ public class VirtualMachineDto {
     public int diskSize;
     public VMStatus status;
     public Long hardwareId;
+    public Long departmentId;
 }
 
 

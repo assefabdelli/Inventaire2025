@@ -16,6 +16,10 @@ public class UserService {
 
     public List<User> findAll() { return repository.findAll(); }
 
+    public List<User> findByDepartmentId(Long departmentId) {
+        return repository.findByDepartmentId(departmentId);
+    }
+
     public Optional<User> findById(Long id) { return repository.findById(id); }
 
     public User save(User user) { return repository.save(user); }

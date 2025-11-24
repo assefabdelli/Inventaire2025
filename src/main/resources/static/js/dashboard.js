@@ -9,18 +9,62 @@ let stats = {
 
 // Load dashboard data on page load
 document.addEventListener('DOMContentLoaded', () => {
+    // Check authentication
+    if (!checkAuth()) return;
+    
+    // Update nav user info
+    updateNavUserInfo();
+    
+    // Hide restricted nav items based on role
+    hideRestrictedNavItems();
+    
+    // Show department filter only for super admins
+    const user = getCurrentUser();
+    if (user && user.role === 'SUPER_ADMIN') {
+        const filterContainer = document.getElementById('departmentFilterContainer');
+        if (filterContainer) filterContainer.style.display = 'block';
+    }
+    
+    // Load data
+    loadDepartments();
+    loadDashboardData();
+});
+
+// Load departments for filter
+async function loadDepartments() {
+    if (!isSuperAdmin()) return; // Only load for super admins
+    
+    try {
+        const departments = await API.get('/departments/active');
+        const select = document.getElementById('departmentFilter');
+        departments.forEach(dept => {
+            const option = document.createElement('option');
+            option.value = dept.id;
+            option.textContent = dept.name;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading departments:', error);
+    }
+}
+
+// Load all dashboard data
+function loadDashboardData() {
     loadStatistics();
     loadRecentTasks();
-});
+}
 
 // Load statistics
 async function loadStatistics() {
     try {
+        const departmentId = document.getElementById('departmentFilter')?.value || '';
+        const query = departmentId ? `?departmentId=${departmentId}` : '';
+        
         const [hardware, vms, sites, tasks] = await Promise.all([
-            API.hardware.getAll(),
-            API.virtualMachines.getAll(),
-            API.sites.getAll(),
-            API.deploymentTasks.getAll()
+            API.get(`/hardware${query}`),
+            API.get(`/virtual-machines${query}`),
+            API.get(`/sites${query}`),
+            API.get(`/deployment-tasks${query}`)
         ]);
 
         stats.hardware = hardware.length;
@@ -31,7 +75,9 @@ async function loadStatistics() {
         updateStatistics();
     } catch (error) {
         console.error('Error loading statistics:', error);
-        showToast('Error loading statistics', 'danger');
+        if (typeof showToast !== 'undefined') {
+            showToast('Error loading statistics', 'danger');
+        }
     }
 }
 
@@ -46,7 +92,9 @@ function updateStatistics() {
 // Load recent deployment tasks
 async function loadRecentTasks() {
     try {
-        const tasks = await API.deploymentTasks.getAll();
+        const departmentId = document.getElementById('departmentFilter')?.value || '';
+        const query = departmentId ? `?departmentId=${departmentId}` : '';
+        const tasks = await API.get(`/deployment-tasks${query}`);
         const container = document.getElementById('recentTasks');
         
         if (tasks.length === 0) {

@@ -6,6 +6,13 @@ let currentFilter = 'ALL';
 
 // Load data on page load
 document.addEventListener('DOMContentLoaded', () => {
+    // Check authentication
+    if (!checkAuth()) return;
+    
+    // Update nav user info
+    updateNavUserInfo();
+    hideRestrictedNavItems();
+    
     loadVMs();
     loadHardwareForDropdown();
 });
@@ -105,13 +112,13 @@ function createVMCard(vm) {
     const statusClass = getStatusBadgeClass(vm.status);
     
     return `
-        <div class="card red">
-            <div class="card" style="width: 85%; height: 85%;">
+        <div class="red">
+            <div class="card">
                 <div class="content">
                     <div class="back">
                         <div class="back-content">
-                            <img src="images/laptop-user_15594453.gif" alt="VM" width="50%" />
-                            <strong>${vm.ipAddress || vm.hostname}</strong>
+                            <img src="images/laptop-user_15594453.gif" alt="VM" style="width: 65%; max-width: 150px;" />
+                            <strong style="font-size: 16px; margin-top: 10px;">${vm.ipAddress || vm.hostname}</strong>
                         </div>
                     </div>
                     <div class="front">
@@ -121,16 +128,16 @@ function createVMCard(vm) {
                             <div class="circle" id="bottom"></div>
                         </div>
                         <div class="front-content">
-                            <small class="badge">${vm.name}</small>
+                            <small class="badge" style="font-size: 12px; padding: 4px 12px;">${vm.name}</small>
                             <div class="description">
                                 <div class="title">
-                                    <div style="font-size: 8px; text-align: left;">
+                                    <div style="font-size: 11px; text-align: left; line-height: 1.6;">
                                         <strong>Hostname:</strong> ${vm.hostname}<br>
                                         <strong>OS:</strong> ${vm.operatingSystem}<br>
                                         <strong>vCPU:</strong> ${vm.vcpu} cores<br>
                                         <strong>vRAM:</strong> ${vm.vram} GB<br>
                                         <strong>Disk:</strong> ${vm.diskSize} GB<br>
-                                        <strong>Status:</strong> <span class="status-badge ${statusClass}">${vm.status}</span>
+                                        <strong>Status:</strong> <span class="status-badge ${statusClass}" style="font-size: 10px;">${vm.status}</span>
                                     </div>
                                 </div>
                             </div>
@@ -138,7 +145,7 @@ function createVMCard(vm) {
                     </div>
                 </div>
             </div>
-            <button class="btn btn-sm btn-success mt-2" onclick="editVMModal(${vm.id})">
+            <button class="btn btn-sm btn-success" onclick="editVMModal(${vm.id})" style="width: 260px; font-size: 14px; padding: 8px;">
                 <i class="fas fa-edit"></i> Edit
             </button>
         </div>

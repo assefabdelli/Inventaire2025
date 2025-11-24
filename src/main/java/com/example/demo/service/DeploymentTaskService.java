@@ -26,6 +26,10 @@ public class DeploymentTaskService {
 
     public List<DeploymentTask> findAll() { return taskRepository.findAll(); }
 
+    public List<DeploymentTask> findByDepartmentId(Long departmentId) {
+        return taskRepository.findByDepartmentId(departmentId);
+    }
+
     public DeploymentTask findByIdOrThrow(Long id) {
         return taskRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }

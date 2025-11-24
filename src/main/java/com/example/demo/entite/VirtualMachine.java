@@ -49,6 +49,10 @@ public class VirtualMachine {
     @JoinColumn(name = "hardware_id", nullable = false)
     private Hardware hardware;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -78,6 +82,9 @@ public class VirtualMachine {
 
     public Hardware getHardware() { return hardware; }
     public void setHardware(Hardware hardware) { this.hardware = hardware; }
+
+    public Department getDepartment() { return department; }
+    public void setDepartment(Department department) { this.department = department; }
 }
 
 

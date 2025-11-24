@@ -1,88 +1,172 @@
 // API Base URL
 const API_BASE_URL = '/api';
 
+// Authentication Helper Functions
+function getCurrentUser() {
+    const userStr = sessionStorage.getItem('currentUser');
+    return userStr ? JSON.parse(userStr) : null;
+}
+
+function isLoggedIn() {
+    return getCurrentUser() !== null;
+}
+
+function isAdmin() {
+    const user = getCurrentUser();
+    return user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN');
+}
+
+function isSuperAdmin() {
+    const user = getCurrentUser();
+    return user && user.role === 'SUPER_ADMIN';
+}
+
+function checkAuth() {
+    if (!isLoggedIn() && !window.location.pathname.includes('login.html')) {
+        window.location.href = 'login.html';
+        return false;
+    }
+    return true;
+}
+
+function logout() {
+    sessionStorage.removeItem('currentUser');
+    window.location.href = 'login.html';
+}
+
+// Update navigation with user info
+function updateNavUserInfo() {
+    const user = getCurrentUser();
+    if (user) {
+        const usernameEl = document.getElementById('navUsername');
+        const deptEl = document.getElementById('navDepartment');
+        const roleEl = document.getElementById('navRole');
+        
+        if (usernameEl) usernameEl.textContent = user.username || 'User';
+        if (deptEl) deptEl.textContent = user.departmentName || 'No Department';
+        if (roleEl) roleEl.textContent = user.role || 'USER';
+    }
+}
+
+// Hide navigation items based on role
+function hideRestrictedNavItems() {
+    if (!isSuperAdmin()) {
+        // Hide Departments and Users nav items for non-super-admins
+        const deptNav = document.getElementById('nav-departments');
+        const usersNav = document.getElementById('nav-users');
+        
+        if (deptNav) deptNav.style.display = 'none';
+        if (usersNav) usersNav.style.display = 'none';
+    }
+}
+
+function getAuthHeaders() {
+    const user = getCurrentUser();
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+    if (user) {
+        headers['X-User-Id'] = user.userId;
+    }
+    return headers;
+}
+
+// Generic API request helper
+async function apiRequest(url, options = {}) {
+    const user = getCurrentUser();
+    const headers = options.headers || {};
+    
+    if (user) {
+        headers['X-User-Id'] = user.userId;
+    }
+    
+    if (options.body && !headers['Content-Type']) {
+        headers['Content-Type'] = 'application/json';
+    }
+    
+    const response = await fetch(url, {
+        ...options,
+        headers
+    });
+    
+    if (response.status === 401 || response.status === 403) {
+        // Unauthorized or Forbidden - redirect to login
+        if (!window.location.pathname.includes('login.html')) {
+            alert('Session expired or insufficient permissions. Please login again.');
+            logout();
+        }
+        throw new Error('Unauthorized');
+    }
+    
+    return response;
+}
+
 // API Helper Functions
 const API = {
-    // Hardware APIs
-    hardware: {
-        getAll: () => fetch(`${API_BASE_URL}/hardware`).then(res => res.json()),
-        getById: (id) => fetch(`${API_BASE_URL}/hardware/${id}`).then(res => res.json()),
-        create: (data) => fetch(`${API_BASE_URL}/hardware`, {
+    // Generic methods
+    get: async (endpoint) => {
+        const response = await apiRequest(`${API_BASE_URL}${endpoint}`);
+        return response.json();
+    },
+    post: async (endpoint, data) => {
+        const response = await apiRequest(`${API_BASE_URL}${endpoint}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
-        }).then(res => res.json()),
-        update: (id, data) => fetch(`${API_BASE_URL}/hardware/${id}`, {
+        });
+        return response.json();
+    },
+    put: async (endpoint, data) => {
+        const response = await apiRequest(`${API_BASE_URL}${endpoint}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
-        }).then(res => res.json()),
-        delete: (id) => fetch(`${API_BASE_URL}/hardware/${id}`, {
+        });
+        return response.json();
+    },
+    delete: async (endpoint) => {
+        return apiRequest(`${API_BASE_URL}${endpoint}`, {
             method: 'DELETE'
-        })
+        });
+    },
+    // Hardware APIs (legacy - use generic methods above)
+    hardware: {
+        getAll: () => API.get('/hardware'),
+        getById: (id) => API.get(`/hardware/${id}`),
+        create: (data) => API.post('/hardware', data),
+        update: (id, data) => API.put(`/hardware/${id}`, data),
+        delete: (id) => API.delete(`/hardware/${id}`)
     },
 
     // Virtual Machine APIs
     virtualMachines: {
-        getAll: () => fetch(`${API_BASE_URL}/virtual-machines`).then(res => res.json()),
-        getById: (id) => fetch(`${API_BASE_URL}/virtual-machines/${id}`).then(res => res.json()),
-        create: (data) => fetch(`${API_BASE_URL}/virtual-machines`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).then(res => res.json()),
-        update: (id, data) => fetch(`${API_BASE_URL}/virtual-machines/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).then(res => res.json()),
-        delete: (id) => fetch(`${API_BASE_URL}/virtual-machines/${id}`, {
-            method: 'DELETE'
-        })
+        getAll: () => API.get('/virtual-machines'),
+        getById: (id) => API.get(`/virtual-machines/${id}`),
+        create: (data) => API.post('/virtual-machines', data),
+        update: (id, data) => API.put(`/virtual-machines/${id}`, data),
+        delete: (id) => API.delete(`/virtual-machines/${id}`)
     },
 
     // Site APIs
     sites: {
-        getAll: () => fetch(`${API_BASE_URL}/sites`).then(res => res.json()),
-        getById: (id) => fetch(`${API_BASE_URL}/sites/${id}`).then(res => res.json()),
-        create: (data) => fetch(`${API_BASE_URL}/sites`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).then(res => res.json()),
-        update: (id, data) => fetch(`${API_BASE_URL}/sites/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).then(res => res.json()),
-        delete: (id) => fetch(`${API_BASE_URL}/sites/${id}`, {
-            method: 'DELETE'
-        })
+        getAll: () => API.get('/sites'),
+        getById: (id) => API.get(`/sites/${id}`),
+        create: (data) => API.post('/sites', data),
+        update: (id, data) => API.put(`/sites/${id}`, data),
+        delete: (id) => API.delete(`/sites/${id}`)
     },
 
     // Deployment Task APIs
     deploymentTasks: {
-        getAll: () => fetch(`${API_BASE_URL}/deployment-tasks`).then(res => res.json()),
-        getById: (id) => fetch(`${API_BASE_URL}/deployment-tasks/${id}`).then(res => res.json()),
-        create: (data) => fetch(`${API_BASE_URL}/deployment-tasks`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).then(res => res.json()),
-        update: (id, data) => fetch(`${API_BASE_URL}/deployment-tasks/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).then(res => res.json()),
-        delete: (id) => fetch(`${API_BASE_URL}/deployment-tasks/${id}`, {
-            method: 'DELETE'
-        })
+        getAll: () => API.get('/deployment-tasks'),
+        getById: (id) => API.get(`/deployment-tasks/${id}`),
+        create: (data) => API.post('/deployment-tasks', data),
+        update: (id, data) => API.put(`/deployment-tasks/${id}`, data),
+        delete: (id) => API.delete(`/deployment-tasks/${id}`)
     },
 
     // User APIs
     users: {
-        getAll: () => fetch(`${API_BASE_URL}/users`).then(res => res.json()),
-        getById: (id) => fetch(`${API_BASE_URL}/users/${id}`).then(res => res.json())
+        getAll: () => API.get('/users'),
+        getById: (id) => API.get(`/users/${id}`)
     }
 };
 
@@ -101,12 +185,19 @@ function showToast(message, type = 'success') {
 
 function getStatusBadgeClass(status) {
     const statusMap = {
+        // Hardware statuses
+        'OPERATIONAL': 'status-active',
+        'MAINTENANCE': 'status-maintenance',
+        'DOWN': 'status-inactive',
+        'DECOMMISSIONED': 'status-failed',
+        // General statuses
         'ACTIVE': 'status-active',
         'INACTIVE': 'status-inactive',
-        'MAINTENANCE': 'status-maintenance',
+        // VM statuses
         'RUNNING': 'status-active',
         'STOPPED': 'status-inactive',
         'SUSPENDED': 'status-maintenance',
+        // Deployment task statuses
         'PENDING': 'status-pending',
         'IN_PROGRESS': 'status-maintenance',
         'COMPLETED': 'status-completed',

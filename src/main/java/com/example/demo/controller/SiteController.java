@@ -1,8 +1,11 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.SiteDto;
+import com.example.demo.entite.Department;
 import com.example.demo.entite.Site;
+import com.example.demo.repository.DepartmentRepository;
 import com.example.demo.service.SiteService;
+import com.example.demo.service.UserContextService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.net.URI;
@@ -11,13 +14,49 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/sites")
+@CrossOrigin(origins = "*")
 public class SiteController {
     private final SiteService service;
-    public SiteController(SiteService service) { this.service = service; }
+    private final DepartmentRepository departmentRepository;
+    private final UserContextService userContextService;
+    
+    public SiteController(SiteService service, DepartmentRepository departmentRepository, UserContextService userContextService) { 
+        this.service = service; 
+        this.departmentRepository = departmentRepository;
+        this.userContextService = userContextService;
+    }
 
     @GetMapping
-    public List<SiteDto> list() {
-        return service.findAll().stream().map(SiteController::toDto).collect(Collectors.toList());
+    public ResponseEntity<?> list(
+            @RequestParam(required = false) Long departmentId,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId) {
+        
+        try {
+            if (userId != null) {
+                userContextService.setCurrentUserId(userId);
+            }
+            
+            // If not admin, force filter by user's department
+            if (userId != null && !userContextService.isAdmin()) {
+                Long userDeptId = userContextService.getCurrentUserDepartmentId();
+                if (userDeptId != null) {
+                    return ResponseEntity.ok(service.findByDepartmentId(userDeptId).stream()
+                            .map(SiteController::toDto).collect(Collectors.toList()));
+                }
+            }
+            
+            // Admin can filter or see all
+            if (departmentId != null) {
+                return ResponseEntity.ok(service.findByDepartmentId(departmentId).stream()
+                        .map(SiteController::toDto).collect(Collectors.toList()));
+            }
+            return ResponseEntity.ok(service.findAll().stream()
+                    .map(SiteController::toDto).collect(Collectors.toList()));
+        } catch (Exception e) {
+            System.err.println("Error loading sites: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.ok(List.of()); // Return empty list instead of error
+        }
     }
 
     @GetMapping("/{id}")
@@ -32,6 +71,11 @@ public class SiteController {
         e.setAddress(dto.address);
         e.setCity(dto.city);
         e.setCountry(dto.country);
+        if (dto.departmentId != null) {
+            Department dept = departmentRepository.findById(dto.departmentId)
+                .orElseThrow(() -> new RuntimeException("Department not found"));
+            e.setDepartment(dept);
+        }
         Site saved = service.save(e);
         return ResponseEntity.created(URI.create("/api/sites/" + saved.getId())).body(toDto(saved));
     }
@@ -43,6 +87,11 @@ public class SiteController {
             e.setAddress(dto.address);
             e.setCity(dto.city);
             e.setCountry(dto.country);
+            if (dto.departmentId != null) {
+                Department dept = departmentRepository.findById(dto.departmentId)
+                    .orElseThrow(() -> new RuntimeException("Department not found"));
+                e.setDepartment(dept);
+            }
             return ResponseEntity.ok(toDto(service.save(e)));
         }).orElse(ResponseEntity.notFound().build());
     }
@@ -61,6 +110,7 @@ public class SiteController {
         dto.address = e.getAddress();
         dto.city = e.getCity();
         dto.country = e.getCountry();
+        dto.departmentId = e.getDepartment() != null ? e.getDepartment().getId() : null;
         return dto;
     }
 }

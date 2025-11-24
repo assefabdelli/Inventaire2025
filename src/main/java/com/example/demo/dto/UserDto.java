@@ -9,6 +9,7 @@ public class UserDto {
     public String passwordHash;
     public boolean enabled;
     public Role role;
+    public Long departmentId;
 }
 
 

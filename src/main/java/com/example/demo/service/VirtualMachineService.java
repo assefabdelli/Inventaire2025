@@ -21,6 +21,10 @@ public class VirtualMachineService {
 
     public List<VirtualMachine> findAll() { return vmRepository.findAll(); }
 
+    public List<VirtualMachine> findByDepartmentId(Long departmentId) {
+        return vmRepository.findByDepartmentId(departmentId);
+    }
+
     public VirtualMachine findByIdOrThrow(Long id) {
         return vmRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }

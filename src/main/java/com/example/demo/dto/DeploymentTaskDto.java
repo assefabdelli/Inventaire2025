@@ -14,6 +14,7 @@ public class DeploymentTaskDto {
     public Instant createdAt;
     public Instant completedAt;
     public Instant scheduledDate;
+    public Long departmentId;
 }
 
 

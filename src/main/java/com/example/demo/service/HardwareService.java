@@ -21,6 +21,10 @@ public class HardwareService {
 
     public List<Hardware> findAll() { return hardwareRepository.findAll(); }
 
+    public List<Hardware> findByDepartmentId(Long departmentId) {
+        return hardwareRepository.findByDepartmentId(departmentId);
+    }
+
     public Hardware findByIdOrThrow(Long id) {
         return hardwareRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }

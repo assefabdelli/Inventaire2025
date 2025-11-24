@@ -16,6 +16,10 @@ public class SiteService {
 
     public List<Site> findAll() { return repository.findAll(); }
 
+    public List<Site> findByDepartmentId(Long departmentId) {
+        return repository.findByDepartmentId(departmentId);
+    }
+
     public Optional<Site> findById(Long id) { return repository.findById(id); }
 
     public Site save(Site site) { return repository.save(site); }

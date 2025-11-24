@@ -18,6 +18,7 @@ public class HardwareDto {
     public LocalDate purchaseDate;
     public LocalDate warrantyEndDate;
     public Long siteId;
+    public Long departmentId;
 }
 
 
